@@ -39,6 +39,7 @@
 				<input type="password" name="r" id="r" /><br />
 				<input type="hidden" name="v" value="<?php echo $_GET['v'] ?>" />
 				<input type="submit" name="verify" id="verify" value="Reset Your Password" />
+				<input type="hidden" name="token" value="<?php echo $SESSION['token']; ?>" />
 			</div
 		</form>
 

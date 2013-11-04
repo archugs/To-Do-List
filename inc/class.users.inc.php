@@ -35,7 +35,12 @@ class ListUsers
          */
 	public function createAccount()	
 	{
-		$u = trim($_POST['username']);
+		if(FALSE === $username = $this->validateUsername($_POST['username']))
+		{
+			return FALSE;
+		}	
+
+		$u = trim($username);
 		$v = sha1(time());
 		
 		$sql = "SELECT COUNT(Username) AS userCount
@@ -71,21 +76,38 @@ class ListUsers
 			$stmt->execute();
 			$stmt->closeCursor();
 
-			$userID = $this->_db->lastInsertId();
-			$url = dechex($userID);
+			//$userID = $this->_db->lastInsertId();
+			//$url = dechex($userID);
 
 			/* If the UserID was successfully retrieved, create a default list */
-			$sql = "INSERT INTO lists (UserID, ListURL) VALUES($userID, $url)";
-			if (! $this->_db->query($sql)) {
-				return "<h2> Error </h2>"
-				."<p> Your account was created, but "
-				."creating your first list failed. </p>";
-			}
-			else {
+			$sql = "INSERT INTO lists (UserID, ListURL) VALUES
+				(
+				  (
+				    SELECT UserID
+				    FROM users
+				    WHERE Username = :email
+				  ),
+				  (
+				    SELECT MD5(UserID)
+				    FROM users
+				    WHERE Username = :email
+				  )
+			         )";
+			
+			if($stmt = $this->_db->prepare($sql)) 
+			{
+				$stmt->bindParam(":email", $u, PDO::PARAM_STR);
+				$stmt->execute();
+				$stmt->closeCursor();
 				return "<h2> SUCCESS! </h2>"
 				."<p> Your account was successfully "
 				."created with the username <strong>$u</strong>."
 				." Check your email!"; 
+			}
+			else {
+				return "<h2> Error </h2>"
+				."<p> Your account was created, but "
+				."creating your first list failed. </p>";
 			}
 		}
 		
@@ -272,6 +294,11 @@ EMAIL;
 	 */
 	public function updateEmail()
 	{
+		if(FALSE === $username = $this->validateUsername($_POST['username']))
+		{
+			return FALSE;
+		}
+
 		$sql = "UPDATE users
 			SET Username = :email
 			WHERE userID = :user
@@ -279,7 +306,7 @@ EMAIL;
 		try 
 		{
 			$stmt = $this->_db->prepare($sql);
-			$stmt->bindParam(':email', $_POST['usernmae'], PDO::PARAM_STR);
+			$stmt->bindParam(':email', $username, PDO::PARAM_STR);
 			$stmt->bindParam(':user', $_POST['userid'], PDO::PARAM_INT);
 			$stmt->execute();
 			$stmt->closeCursor();
@@ -358,9 +385,9 @@ EMAIL;
 				die($e->getMessage());
 			}
 			
-			//Destroy the user's session and senf to a confirmation page
+			//Destroy the user's session and send to a confirmation page
 			unset($_SESSION['LoggedIn'], $_SESSION['Username']);
-			header("Location: gone.php");
+			header("Location: ../gone.php");
 			exit;
 		}
 		else
@@ -434,8 +461,18 @@ www.todolist.com
 EMAIL;
 		return mail($to, $subject, $msg, $headers);
 	}
-}
 
+	/** Verifies that a valid email address was passed
+	 * @param string $email - The email address to check
+	 * @return mixed - The email address on success, FALSE on failure
+	 */
+	private function validateUsername($email)
+	{
+		$pattern = "/^([a-zA-Z0-9])+([a-zA-Z0-9\._-])*@([a-zA-Z0-9_-])+([a-zA-Z0-9\._-]+)+$/";
+		$username = htmlentities(trim($email), ENT_QUOTES);
+		return preg_match($pattern, $username) ? $username : FALSE;
+	}
+}
 ?>
 
 

@@ -28,10 +28,12 @@ function saveListOrder(itemID, itemREL) {
 			}
 			else {
 				var direction = 'up';
-			}
-			var postURL = "action=sort&currentListID=" + currentListID + "&startPos=" + startPos +
+			}	
+			var token = $('#token').val(),
+				postURL = "action=sort&currentListID=" + currentListID + "&startPos=" + startPos +
 				"&currentPos=" + currentPos +
-				"&direction=" + direction;
+				"&direction=" + direction +
+				"&token=" + token;
 
 			$.ajax({
 				type: 'POST',
@@ -57,13 +59,14 @@ function saveListOrder(itemID, itemREL) {
 // This is separated to a function so that it can be called at page load
 // as well as when new list items are appended via AJAX
 function bindAllTabs(editableTarget) {
+	var token = $('#token').val();
 	$(editableTarget).editable("db-interaction/lists.php", {
 		id : 'listItemID',
 		indicator : 'Saving...',
 		tooltip : 'Double-click to edit...',
 		event : 'dblclick',
 		submit : 'Save',
-		submitdata : {action : "update"}
+		submitdata : {action : "update", "token" : token}
 	});
 }
 
@@ -72,8 +75,8 @@ function initialize() {
 	//Wrap list text in a span and apply functionality tabs
 	$("#list li")
 		.wrapInner("<span>")
-		.append("<div class='draggertab tab'></div><div class='colortab tab'></div><div class='deletetab tab'></div><div class='donetab tab'></div>");
-/*		.each(function() {
+		.append("<div class='draggertab tab'></div><div class='colortab tab'></div><div class='deletetab tab'></div><div class='donetab tab'></div>")
+		.each(function() {
 			if($(this).find("img.crossout").length)
 			{	
 				$(this).find("span").css({
@@ -82,7 +85,7 @@ function initialize() {
 			}
 		});
 
-*/
+
 	bindAllTabs("#list li span");
 
 	//Make the list Sortable via JQuery UI
@@ -109,19 +112,25 @@ function initialize() {
 		// HTML tag whitelist. All other tags are stripped.
 		var $whitelist = '<b><i><strong><em><a>',
 			forList = $("#current-list").val(),
-			newListItemText = $("#new-list-item-text").val(),
+			newListItemText = cleanHREF($("#new-list-item-text").val()),
 			URLtext = escape(newListItemText),
 			newListItemRel = $('#list li').size()+1;
+			token = $('#token').val();
 	
 		if(newListItemText.length > 0) {
+			//Button is DISABLED
+			$("#add-new-submit").attr("disabled", true);
+
 			$.ajax({
 				type: 'POST',
 				url: "db-interaction/lists.php",
-				data: "action=add&list=" + forList + "&text=" + URLtext + "&pos=" + newListItemRel, 
+				data: "action=add&list=" + forList + "&text=" + URLtext + "&pos=" + newListItemRel + "&token=" + token,
 				success: function(theResponse) {
 					$("#list").append("<li color='1' class='colorBlue' rel='" + newListItemRel + "' id='" + theResponse + "'><span id=\"" + theResponse + "listitem\" title='Click to edit...'>" + newListItemText + "</span><div class='draggertab tab'></div><div class='colortab tab'></div><div class='deletetab tab'></div><div class='donetab tab'></div></li>");
 					bindAllTabs("#list li[rel='"  + newListItemRel +  "'] span");
+					//The field is cleared and button is re-enabled
 					$("#new-list-item-text").val("");
+					$("#add-new-submit").removeAttr("disabled");
 				},
                 	
 				error : function(msg) {
@@ -173,10 +182,11 @@ function initialize() {
 
 	function toggleDone(id, isDone)
 	{
+		var token = $('#token').val();
 		$.ajax({
 			type: "POST",
 			url: "db-interaction/lists.php",
-			data: "action=done&id=" + id + "&done=" + isDone
+			data: "action=done&id=" + id + "&done=" + isDone + "&token=" + token
 		})
 	}
 
@@ -184,11 +194,12 @@ function initialize() {
 	$(".colortab").live("click", function() {
 		$(this).parent().nextColor();
 		var id = $(this).parent().attr("id"),
-			color = $(this).parent().attr("color");
+			color = $(this).parent().attr("color"),
+			token = $('#token').val();
 		$.ajax({
 			type: "POST",
 			url: "db-interaction/lists.php",
-			data: "action=color&id=" + id + "&color=" + color,
+			data: "action=color&id=" + id + "&color=" + color + "&token=" + token,
 			success: function(msg) {
 				//alert(msg); //for debugging
 			}
@@ -203,6 +214,7 @@ function initialize() {
 			list = $('#current-list').val(),
 			id = thiscache.parents().attr("id"),
 			pos = thiscache.parents('li').attr('rel');
+			token = $('#token').val();
 
 		if(thiscache.data("readyToDelete") == "go for it") {
 			$.ajax( {
@@ -212,7 +224,8 @@ function initialize() {
 					"list": list,
 					"id": id,
 					"action": "delete",
-					"pos": pos
+					"pos": pos,
+					"token": token
 				},
 				success : function(r) {
 					var $li = $('#list').children('li'),
@@ -241,4 +254,10 @@ function initialize() {
 			.data("readyToDelete", "go for it");
 		}
 	});
+}
+
+//Check for JS in the href attribute
+function cleanHREF(str)
+{
+	return str.replace(/\<a(.*?)href=['"](javascript:)(.+?)<\/a>/gi, "Attack");
 }

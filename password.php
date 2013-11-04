@@ -13,6 +13,7 @@
 			<input type="text" name="username" id="username" />
 			<label for="username">Email</label><br /><br />
 			<input type="submit" name="reset" id="reset" value="Reset Password" class="button" />
+			<input type="hidden" name="token" value="<?php echo $_SESSION['token']; ?>" />
 		</div>
 	</form>
 <?php

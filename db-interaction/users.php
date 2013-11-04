@@ -6,7 +6,7 @@ include_once "../inc/constants.inc.php";
 include_once "../inc/class.users.inc.php";
 $userObj = new ListUsers();
 
-if (!empty($_POST['action']) && isset($_SESSION['LoggedIn']) && $_SESSION['LoggedIn'] == 1)
+if ($_POST['token'] == $_SESSION['token'] && !empty($_POST['action']) && isset($_SESSION['LoggedIn']) && $_SESSION['LoggedIn'] == 1)
 {
 	switch($_POST['action'])
 	{

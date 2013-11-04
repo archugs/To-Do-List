@@ -4,7 +4,8 @@ session_start();
 
 include_once "../inc/constants.inc.php";
 include_once "../inc/class.lists.inc.php";
-if(isset($_POST['action']) && isset($_SESSION['LoggedIn']) && $_SESSION['LoggedIn'] == 1)
+if(isset($_POST['token']) && $_SESSION['token'] == $_POST['token'] && 
+isset($_POST['action']) && isset($_SESSION['LoggedIn']) && $_SESSION['LoggedIn'] == 1)
 {
 	$listObj = new ListItems();
 	switch($_POST['action'])

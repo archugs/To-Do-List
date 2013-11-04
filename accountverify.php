@@ -38,6 +38,7 @@
 			<input type="password" name="r" id="r" /><br />
 			<input type="hidden" name="v" value="<?php echo $_GET['v'] ?>" />
 			<input type="submit" name="verify" id="verify" value="Verify Your Account">
+			<input type="hidden" name="token" value="<?php echo $_SESSION['token']; ?>" />
 			
 		</div>
 	</form>
@@ -45,7 +46,7 @@
 <?php
 		endif;
 	else:
-		echo '<meta http-eqiv="refresh" content=0;index.php">';
+		echo '<meta http-equiv="refresh" content="0;index.php">';
 	endif;
 	
 	include_once("common/sidebar.php");

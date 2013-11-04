@@ -47,6 +47,7 @@
 			<label for="username">Change Email Address</label>
 			<br /><br />
 			<input type="submit" name="change-email-submit" id="change-email-submit" value="Change Email" class="button" />
+			<input type="hidden" name="token" value="<?php echo $_SESSION['token']; ?>" />
 		</div>
 	</form>
 
@@ -64,6 +65,7 @@
 			<label for="password">Repeat New Password</label>
 			<br /><br />		
 			<input type="submit" name="change-password-submit" id="change-password-submit" value="Change Password" class="button" />
+			<input type="hidden" name="token" value="<?php echo $_SESSION['token']; ?>" />
 		</div>
 	</form>
 
@@ -73,6 +75,7 @@
 		<div>
 			<input type="hidden" name="userid" value="<?php echo $userID ?>" />
 			<input type="submit" name="delete-account-submit" id="delete-account-submit" value="Delete Account?" class="button" />
+			<input type="hidden" name="token" value="<?php echo $_SESSION['token']; ?>" />
 		</div>
 	</form>			
 

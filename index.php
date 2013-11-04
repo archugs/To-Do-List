@@ -25,6 +25,7 @@ if(isset($_SESSION['LoggedIn']) && isset($_SESSION['Username'])):
 		<input type="hidden" id="current-list" name="current-list" value="<?php echo $LID; ?>" /> 
 		<input type="hidden" id="new-list-item-position" name="new-list-item-position" value="<?php echo ++$order ?>" />
 		<input type="submit" id="add-new-submit" value="Add" class="button" />
+		<input type="hidden" id="token" name="token" value="<?php echo $_SESSION['token']; ?>" />
 	</form>
 
 	<div class="clear"></div>

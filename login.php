@@ -1,14 +1,14 @@
 <?php
 	include_once "common/connection.php";
-	$pageTitle = "Home";
+	$pageTitle = "Log In";
 	include_once "common/header.php";
 
-	if (isset($_SESSION['LoggedIn']) && isset($_SESSION['Username'])):
+	if(isset($_SESSION['LoggedIn']) && isset($_SESSION['Username'])):
 ?>
 	<p>You are currenly <strong>logged in.</strong></p>
 	<p><a href="logout.php">Log out</a></p>
 <?php
-	elseif(isset($_POST['username']) && isset($_POST['password'])):
+	elseif(isset($_POST['token']) && $_SESSION['token'] == $_POST['token'] && isset($_POST['username']) && isset($_POST['password'])):
 		include_once 'inc/class.users.inc.php';
 		$users = new ListUsers($db);
 		if($users->accountLogin() == TRUE):
@@ -26,6 +26,7 @@
 			<label for="password">Password</label>
 			<br /><br />
 			<input type="submit" name="login" id="login" value="Login" class="button" />
+			<input type="hidden" name="token" value="<?php echo $_SESSION['token']; ?>" />
 		</div>
 	</form>
 	<p><a href="password.php">Did you forget your password?</a></p>
@@ -45,6 +46,7 @@
 			<label for="password">Password</label>
 			<br /><br />
 			<input type="submit" name="login" id="login" value="Login" class="button" />
+			<input type="hidden" name="token" value="<?php echo $_SESSION['token']; ?>" />
 		</div>
 	</form><br /><br />
 	<p><a href="password.php">Did you forget your password?</a></p>
